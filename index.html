@@ -5,51 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FocusScore MVP</title>
   <style>
-    :root { --border:#e6e6e6; --muted:#666; }
-    body { font-family: Arial, sans-serif; margin: 0; background:#fafafa; color:#111; }
-    header { padding: 20px; background:white; border-bottom:1px solid var(--border); }
-    .wrap { max-width: 1000px; margin: 0 auto; }
-    h1 { margin: 0 0 6px; }
-    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    input, select, button { padding:8px 10px; border:1px solid var(--border); border-radius:8px; }
-    main { padding:20px; }
-    .grid { display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
-    .card { background:white; border:1px solid var(--border); border-radius:12px; padding:14px; }
-    .item { display:flex; justify-content:space-between; padding:10px; border:1px solid var(--border); border-radius:10px; cursor:pointer; margin-bottom:8px; }
-    .pill { border:1px solid var(--border); border-radius:999px; padding:4px 10px; font-size:12px; }
-    .muted { color:#666; font-size:13px; }
+    :root { --border:#e6e6e6; --muted:#666; --bg:#fafafa; --card:#fff; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; background:var(--bg); color:#111; }
+
+    header { padding: 22px 18px; background:var(--card); border-bottom:1px solid var(--border); position: sticky; top:0; z-index:10; }
+    .wrap { max-width: 1040px; margin: 0 auto; }
+
+    .brand { display:flex; align-items:center; gap:10px; }
+    .logo {
+      width:34px; height:34px; border-radius:10px; border:1px solid var(--border);
+      display:grid; place-items:center; font-weight:800;
+      background:#f7f7f7;
+    }
+    h1 { font-size: 20px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 6px; max-width: 780px; }
+
+    .controls { display:flex; gap:10px; flex-wrap: wrap; margin: 14px 0 0; }
+    input, select, button {
+      padding: 10px 12px; border:1px solid var(--border); border-radius: 10px; background:var(--card); font-size: 14px;
+    }
+    button { cursor:pointer; }
+
+    main { padding: 18px; }
+    .grid { display:grid; grid-template-columns: 1.25fr .75fr; gap: 14px; align-items:start; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+
+    .rowHead { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+    .title { font-weight: 700; }
+    .small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .list { display:flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .item {
+      display:flex; justify-content: space-between; gap: 12px;
+      padding: 12px; border:1px solid var(--border); border-radius: 12px; cursor:pointer;
+    }
+    .item:hover { background:#fcfcfc; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .pill { padding: 6px 10px; border-radius: 999px; border:1px solid var(--border); font-size: 12px; white-space: nowrap; background:#f7f7f7; }
+    .score { font-weight: 800; }
+
+    .kpi { display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
+
+    .bar { height: 10px; background:#f0f0f0; border-radius:999px; overflow:hidden; border:1px solid var(--border); }
+    .bar > div { height:100%; background:#111; width:0%; }
+
+    .section { margin-top: 14px; }
+    .section .title { font-size:14px; }
+    .muted { color: var(--muted); }
+
+    .rubric table { width:100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .rubric th, .rubric td { border-top:1px solid var(--border); padding: 10px 8px; vertical-align: top; }
+    .rubric th { text-align:left; color:#111; }
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <h1>FocusScore MVP</h1>
-      <div class="muted">Rates kids’ content by focus impact (not screen time).</div>
+      <div class="brand">
+        <div class="logo">FS</div>
+        <div>
+          <h1>FocusScore MVP</h1>
+          <div class="sub">
+            A simple directory that rates kids’ digital content by focus impact (not screen time).
+            Click items to see a score breakdown + alternatives.
+          </div>
+        </div>
+      </div>
+
       <div class="controls">
-        <input id="search" placeholder="Search"/>
+        <input id="search" placeholder="Search (e.g., Bluey, Minecraft)"/>
         <select id="age">
           <option value="all">All ages</option>
           <option value="4-6">Ages 4–6</option>
           <option value="7-10">Ages 7–10</option>
         </select>
-        <select id="sort">
-          <option value="score_desc">Score high → low</option>
-          <option value="score_asc">Score low → high</option>
+        <select id="type">
+          <option value="all">All types</option>
+          <option value="show">Show</option>
+          <option value="youtube">YouTube</option>
+          <option value="game">Game</option>
+          <option value="app">App</option>
         </select>
+        <select id="sort">
+          <option value="score_desc">Sort: Score (high → low)</option>
+          <option value="score_asc">Sort: Score (low → high)</option>
+          <option value="name_asc">Sort: Name (A → Z)</option>
+        </select>
+        <button id="reset">Reset</button>
       </div>
     </div>
   </header>
 
   <main class="wrap">
     <div class="grid">
-      <div class="card">
-        <h3>Directory</h3>
-        <div id="list"></div>
-      </div>
-      <div class="card" id="detail">
-        <h3>Select an item</h3>
-        <div class="muted">Details appear here</div>
-      </div>
+      <section class="card">
+        <div class="rowHead">
+          <div>
+            <div class="title">Directory</div>
+            <div class="small">Click an item to view Focus Score breakdown + recommendations.</div>
+          </div>
+          <div class="pill"><span id="count">0</span> items</div>
+        </div>
+
+        <div class="list" id="list"></div>
+      </section>
+
+      <aside class="card" id="detail">
+        <div class="title">Select a piece of content</div>
+        <div class="muted" style="margin-top:6px;">You’ll see the Focus Score breakdown here.</div>
+
+        <div class="section rubric">
+          <div class="title">Rubric (0–4 per category)</div>
+          <div class="small">Weights: Pacing 25%, Stimulation 20%, Cognitive 25%, Interruptions 15%, Narrative 15%</div>
+          <table>
+            <tr><th>Category</th><th>What we’re measuring</th></tr>
+            <tr><td>Pacing</td><td>How often scenes/cuts change (count in 60 seconds)</td></tr>
+            <tr><td>Stimulation</td><td>Intensity spikes (loud/flash/chaos frequency)</td></tr>
+            <tr><td>Cognitive</td><td>Thinking/planning vs passive watching</td></tr>
+            <tr><td>Interruptions</td><td>Ads, autoplay loops, pop-ups, algorithm pulls</td></tr>
+            <tr><td>Narrative</td><td>Does attention get rewarded by story continuity?</td></tr>
+          </table>
+        </div>
+      </aside>
     </div>
   </main>
 
