@@ -2,134 +2,350 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FocusScore MVP</title>
   <style>
-    :root { --border:#e6e6e6; --muted:#666; --bg:#fafafa; --card:#fff; }
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; background:var(--bg); color:#111; }
-
-    header { padding: 22px 18px; background:var(--card); border-bottom:1px solid var(--border); position: sticky; top:0; z-index:10; }
-    .wrap { max-width: 1040px; margin: 0 auto; }
-
-    .brand { display:flex; align-items:center; gap:10px; }
-    .logo {
-      width:34px; height:34px; border-radius:10px; border:1px solid var(--border);
-      display:grid; place-items:center; font-weight:800;
-      background:#f7f7f7;
+    :root{
+      --bg:#f3f5f8;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border: rgba(15, 23, 42, .12);
+      --shadow: 0 10px 25px rgba(2, 6, 23, .08);
+      --shadow-soft: 0 8px 18px rgba(2, 6, 23, .06);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --fs-blue-1:#2b4a86;
+      --fs-blue-2:#1f3769;
+      --fs-blue-3:#254780;
     }
-    h1 { font-size: 20px; margin: 0; }
-    .sub { color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 6px; max-width: 780px; }
 
-    .controls { display:flex; gap:10px; flex-wrap: wrap; margin: 14px 0 0; }
-    input, select, button {
-      padding: 10px 12px; border:1px solid var(--border); border-radius: 10px; background:var(--card); font-size: 14px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+      background: radial-gradient(1200px 600px at 50% -120px, rgba(37,71,128,.35), transparent 70%) , var(--bg);
+      color:var(--text);
     }
-    button { cursor:pointer; }
 
-    main { padding: 18px; }
-    .grid { display:grid; grid-template-columns: 1.25fr .75fr; gap: 14px; align-items:start; }
-    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
-
-    .card { background:var(--card); border:1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
-
-    .rowHead { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
-    .title { font-weight: 700; }
-    .small { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-    .list { display:flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-    .item {
-      display:flex; justify-content: space-between; gap: 12px;
-      padding: 12px; border:1px solid var(--border); border-radius: 12px; cursor:pointer;
+    /* Top bar (blue like the mockup) */
+    .topbar{
+      position: sticky;
+      top:0;
+      z-index:50;
+      background: linear-gradient(135deg, rgba(46,83,150,.95), rgba(28,58,120,.95));
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 12px 30px rgba(2,6,23,.18);
+      backdrop-filter: blur(8px);
     }
-    .item:hover { background:#fcfcfc; }
-    .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
-    .pill { padding: 6px 10px; border-radius: 999px; border:1px solid var(--border); font-size: 12px; white-space: nowrap; background:#f7f7f7; }
-    .score { font-weight: 800; }
+    .wrap{max-width:1180px;margin:0 auto;padding:18px 18px;}
+    .brandRow{display:flex;align-items:center;gap:14px}
 
-    .kpi { display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
+    .logo{
+      width:42px;height:42px;border-radius:10px;
+      display:grid;place-items:center;
+      font-weight:800;letter-spacing:.5px;
+      color:#fff;
+      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 18px rgba(2,6,23,.20);
+    }
+    .brandText{display:flex;flex-direction:column}
+    .brandTitle{
+      font-size:24px;
+      font-weight:800;
+      color:#fff;
+      line-height:1.1;
+      margin:0;
+    }
+    .brandTitle span{font-weight:500;opacity:.9}
+    .brandSub{
+      margin-top:6px;
+      color: rgba(255,255,255,.88);
+      font-size:14px;
+      line-height:1.4;
+    }
 
-    .bar { height: 10px; background:#f0f0f0; border-radius:999px; overflow:hidden; border:1px solid var(--border); }
-    .bar > div { height:100%; background:#111; width:0%; }
+    /* Filter bar (white strip under topbar like mockup) */
+    .filterStrip{
+      border-top:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    }
+    .filters{
+      display:flex;gap:12px;flex-wrap:wrap;
+      padding:14px 18px 16px;
+      max-width:1180px;margin:0 auto;
+    }
 
-    .section { margin-top: 14px; }
-    .section .title { font-size:14px; }
-    .muted { color: var(--muted); }
+    .input, .select{
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      padding:0 12px;
+      font-size:14px;
+      outline:none;
+      box-shadow: 0 10px 18px rgba(2,6,23,.10);
+    }
+    .input{min-width:320px;padding-left:40px}
+    .searchWrap{position:relative}
+    .searchIcon{
+      position:absolute;left:12px;top:50%;transform:translateY(-50%);
+      width:18px;height:18px;opacity:.55;
+    }
 
-    .rubric table { width:100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-    .rubric th, .rubric td { border-top:1px solid var(--border); padding: 10px 8px; vertical-align: top; }
-    .rubric th { text-align:left; color:#111; }
+    .btn{
+      height:42px;
+      padding:0 16px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.22);
+      background: linear-gradient(180deg, rgba(37,71,128,.98), rgba(29,58,120,.98));
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 12px 22px rgba(2,6,23,.18);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    /* Main layout */
+    main{max-width:1180px;margin:0 auto;padding:20px 18px 40px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr 1.35fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .input{min-width:260px}
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .cardHeader{
+      padding:16px 16px 10px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      border-bottom:1px solid rgba(15,23,42,.08);
+      background: linear-gradient(180deg, rgba(2,6,23,.02), transparent);
+    }
+    .cardTitle{
+      font-weight:800;
+      font-size:20px;
+      display:flex;align-items:baseline;gap:10px;
+    }
+    .count{
+      color: var(--muted);
+      font-weight:700;
+      font-size:14px;
+    }
+
+    /* Directory list */
+    .list{padding:10px 10px 12px;display:flex;flex-direction:column;gap:10px}
+    .row{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background:#fff;
+      cursor:pointer;
+      transition: transform .08s ease, box-shadow .08s ease, background .08s ease;
+    }
+    .row:hover{
+      background: rgba(2,6,23,.01);
+      box-shadow: 0 10px 18px rgba(2,6,23,.08);
+      transform: translateY(-1px);
+    }
+    .rowLeft{display:flex;align-items:center;gap:12px;min-width:0}
+    .thumb{
+      width:42px;height:42px;border-radius:12px;
+      border:1px solid rgba(15,23,42,.12);
+      background: linear-gradient(180deg, rgba(2,6,23,.06), rgba(2,6,23,.02));
+      display:grid;place-items:center;
+      font-weight:800;color:rgba(15,23,42,.65);
+      flex:0 0 auto;
+      overflow:hidden;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .nameBlock{min-width:0}
+    .name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{color:var(--muted);font-size:12.5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .scorePill{
+      display:flex;align-items:center;gap:10px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.12);
+      font-size:12.5px;
+      font-weight:800;
+      flex:0 0 auto;
+      min-width: 160px;
+      justify-content:space-between;
+      box-shadow: 0 10px 14px rgba(2,6,23,.06);
+    }
+    .scoreNum{font-weight:900}
+    .tag{font-weight:900}
+
+    /* Right detail card */
+    .detailBody{padding:16px}
+    .detailTop{
+      display:grid;
+      grid-template-columns: 210px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .detailTop{grid-template-columns:1fr}
+    }
+    .heroImg{
+      width:100%;
+      aspect-ratio: 4/3;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.12);
+      background: linear-gradient(180deg, rgba(2,6,23,.06), rgba(2,6,23,.02));
+      overflow:hidden;
+    }
+    .heroImg img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .detailTitle{font-size:30px;font-weight:900;margin:0}
+    .detailMeta{color:var(--muted);font-weight:700;margin-top:6px}
+
+    .bigScore{
+      display:inline-flex;align-items:center;justify-content:center;
+      margin-top:12px;
+      padding:10px 14px;
+      border-radius:12px;
+      background: #2f62c8;
+      color:#fff;
+      font-weight:900;
+      box-shadow: 0 14px 24px rgba(47,98,200,.25);
+      border:1px solid rgba(15,23,42,.12);
+      font-size:18px;
+    }
+
+    .section{margin-top:18px;padding-top:14px;border-top:1px solid rgba(15,23,42,.08)}
+    .sectionTitle{font-weight:900;font-size:16px;margin:0 0 8px}
+    .whyText{color:rgba(15,23,42,.90);line-height:1.55}
+
+    /* Bars */
+    .bars{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+    .barRow{display:grid;grid-template-columns: 170px 1fr;gap:12px;align-items:center}
+    .barLabel{color:rgba(15,23,42,.90);font-weight:800;font-size:13px}
+    .barTrack{
+      height:14px;border-radius:999px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(2,6,23,.04);
+      overflow:hidden;
+    }
+    .barFill{height:100%;width:0%;border-radius:999px;background: linear-gradient(90deg, rgba(47,98,200,.90), rgba(37,71,128,.90));}
+
+    /* Alternatives */
+    ul{margin:8px 0 0 18px;padding:0}
+    li{margin:6px 0;color:rgba(15,23,42,.92);font-weight:700}
+
+    /* Footer callout */
+    .consistency{
+      margin-top:16px;
+      padding:12px 12px;
+      border-radius:12px;
+      background: rgba(34,197,94,.10);
+      border:1px solid rgba(34,197,94,.25);
+      color: rgba(15,23,42,.85);
+      font-weight:800;
+      font-size:13px;
+    }
+
+    /* score colors like mockup pills */
+    .pill-green{background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.30)}
+    .pill-yellow{background: rgba(234,179,8,.14); border-color: rgba(234,179,8,.32)}
+    .pill-orange{background: rgba(249,115,22,.14); border-color: rgba(249,115,22,.32)}
+    .pill-red{background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.32)}
+
+    /* small helper for empty states */
+    .empty{
+      padding:18px;
+      color: var(--muted);
+      font-weight:700;
+    }
   </style>
 </head>
+
 <body>
-  <header>
+  <div class="topbar">
     <div class="wrap">
-      <div class="brand">
+      <div class="brandRow">
         <div class="logo">FS</div>
-        <div>
-          <h1>FocusScore MVP</h1>
-          <div class="sub">
-            A simple directory that rates kids’ digital content by focus impact (not screen time).
+        <div class="brandText">
+          <div class="brandTitle">FocusScore <span>MVP</span></div>
+          <div class="brandSub">
+            A simple directory that rates kids’ digital content by <b>focus impact</b>.
             Click items to see a score breakdown + alternatives.
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="controls">
-        <input id="search" placeholder="Search (e.g., Bluey, Minecraft)"/>
-        <select id="age">
+    <div class="filterStrip">
+      <div class="filters">
+        <div class="searchWrap">
+          <svg class="searchIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 16l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input class="input" id="search" placeholder="Search (e.g., Peppa Pig, Minecraft)" />
+        </div>
+
+        <select class="select" id="age">
           <option value="all">All ages</option>
-          <option value="4-6">Ages 4–6</option>
-          <option value="7-10">Ages 7–10</option>
+          <option value="2-4">Ages 2–4</option>
+          <option value="3-7">Ages 3–7</option>
+          <option value="7-12">Ages 7–12</option>
+          <option value="8-12">Ages 8–12</option>
         </select>
-        <select id="type">
+
+        <select class="select" id="type">
           <option value="all">All types</option>
-          <option value="show">Show</option>
+          <option value="show">TV Show</option>
           <option value="youtube">YouTube</option>
           <option value="game">Game</option>
-          <option value="app">App</option>
         </select>
-        <select id="sort">
+
+        <select class="select" id="sort">
           <option value="score_desc">Sort: Score (high → low)</option>
           <option value="score_asc">Sort: Score (low → high)</option>
           <option value="name_asc">Sort: Name (A → Z)</option>
         </select>
-        <button id="reset">Reset</button>
+
+        <button class="btn" id="reset">Reset</button>
       </div>
     </div>
-  </header>
+  </div>
 
-  <main class="wrap">
+  <main>
     <div class="grid">
-      <section class="card">
-        <div class="rowHead">
-          <div>
-            <div class="title">Directory</div>
-            <div class="small">Click an item to view Focus Score breakdown + recommendations.</div>
-          </div>
-          <div class="pill"><span id="count">0</span> items</div>
-        </div>
 
+      <!-- LEFT: Directory -->
+      <section class="card">
+        <div class="cardHeader">
+          <div class="cardTitle">Directory <span class="count" id="count">0 items</span></div>
+          <div style="opacity:.55;font-weight:900;">⌄</div>
+        </div>
         <div class="list" id="list"></div>
       </section>
 
-      <aside class="card" id="detail">
-        <div class="title">Select a piece of content</div>
-        <div class="muted" style="margin-top:6px;">You’ll see the Focus Score breakdown here.</div>
-
-        <div class="section rubric">
-          <div class="title">Rubric (0–4 per category)</div>
-          <div class="small">Weights: Pacing 25%, Stimulation 20%, Cognitive 25%, Interruptions 15%, Narrative 15%</div>
-          <table>
-            <tr><th>Category</th><th>What we’re measuring</th></tr>
-            <tr><td>Pacing</td><td>How often scenes/cuts change (count in 60 seconds)</td></tr>
-            <tr><td>Stimulation</td><td>Intensity spikes (loud/flash/chaos frequency)</td></tr>
-            <tr><td>Cognitive</td><td>Thinking/planning vs passive watching</td></tr>
-            <tr><td>Interruptions</td><td>Ads, autoplay loops, pop-ups, algorithm pulls</td></tr>
-            <tr><td>Narrative</td><td>Does attention get rewarded by story continuity?</td></tr>
-          </table>
+      <!-- RIGHT: Detail -->
+      <aside class="card">
+        <div class="detailBody" id="detail">
+          <div class="empty">Select an item from the directory to view details.</div>
         </div>
       </aside>
+
     </div>
   </main>
 
