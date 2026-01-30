@@ -1,4 +1,4 @@
-// FocusScore MVP — full polished build (filters + dropdowns + charts + rubric + color coding)
+// FocusScore MVP — Expanded Dataset + Highlighted Alternatives
 
 function scoreClass(score){
   if(score >= 8) return "score-green";
@@ -8,257 +8,320 @@ function scoreClass(score){
 }
 
 function labelFor(score){
-  if(score >= 8) return "Great for focus";
-  if(score >= 6) return "Decent";
+  if(score >= 8) return "Excellent for focus";
+  if(score >= 6) return "Good";
   if(score >= 4) return "Mixed";
-  return "Risky";
+  return "High Risk";
 }
 
 function pctFrom04(v){
-  const clamped = Math.max(0, Math.min(4, v));
-  return Math.round((clamped / 4) * 100);
+  return Math.round((Math.max(0,Math.min(4,v))/4)*100);
 }
 
 function typeLabel(t){
-  if(t === "show") return "TV SHOW";
-  if(t === "youtube") return "YOUTUBE";
+  if(t==="show") return "TV SHOW";
+  if(t==="youtube") return "YOUTUBE";
   return "GAME";
 }
 
 function initials(name){
-  const parts = name.replace(/[()]/g,"").split(" ").filter(Boolean);
-  return parts.slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  return name.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
 }
 
-// 20 U.S.-oriented starter entries for your MVP (you can edit scores later)
+/* ===========================
+   DATASET (50+ ENTRIES)
+   =========================== */
+
 const CONTENT = [
-  // Shows (US)
-  { id:"bluey", name:"Bluey", type:"show", age:"3-7", score:8.7,
-    breakdown:{ pacing:3.5, stimulation:2.5, cognitive:3.5, interruptions:3.5, narrative:3.8 },
-    why:"Story-based episodes with calmer pacing. Attention is rewarded with continuity and meaning.",
-    alternatives:["Daniel Tiger’s Neighborhood","Sesame Street","Numberblocks"]
-  },
-  { id:"peppa", name:"Peppa Pig", type:"show", age:"3-7", score:7.2,
-    breakdown:{ pacing:3.0, stimulation:2.6, cognitive:2.6, interruptions:3.6, narrative:3.0 },
-    why:"Simple stories and steady pacing. Usually less chaotic than hyper-fast preschool edits.",
-    alternatives:["Bluey","Daniel Tiger’s Neighborhood"]
-  },
-  { id:"daniel", name:"Daniel Tiger’s Neighborhood", type:"show", age:"2-4", score:6.8,
-    breakdown:{ pacing:3.0, stimulation:3.0, cognitive:2.6, interruptions:3.5, narrative:2.8 },
-    why:"Calm pacing with repetition that supports patience and listening.",
-    alternatives:["Bluey","Sesame Street"]
-  },
-  { id:"sesame", name:"Sesame Street", type:"show", age:"3-7", score:6.5,
-    breakdown:{ pacing:2.6, stimulation:2.7, cognitive:2.9, interruptions:3.4, narrative:2.4 },
-    why:"Educational and engaging, though the segment format can feel jumpy.",
-    alternatives:["Daniel Tiger’s Neighborhood","Numberblocks"]
-  },
-  { id:"paw", name:"Paw Patrol", type:"show", age:"3-7", score:5.4,
-    breakdown:{ pacing:2.2, stimulation:2.0, cognitive:2.1, interruptions:3.4, narrative:2.4 },
-    why:"Action-heavy and stimulation-forward; still has an episode arc.",
-    alternatives:["Bluey","Wild Kratts"]
-  },
-  { id:"wildkratts", name:"Wild Kratts", type:"show", age:"3-7", score:6.9,
-    breakdown:{ pacing:2.7, stimulation:2.5, cognitive:3.0, interruptions:3.5, narrative:2.7 },
-    why:"Curiosity-driven educational format that supports longer attention arcs.",
-    alternatives:["Bluey","Sesame Street"]
-  },
 
-  // YouTube
-  { id:"cocomelon", name:"Cocomelon", type:"youtube", age:"2-4", score:2.1,
-    breakdown:{ pacing:0.6, stimulation:0.7, cognitive:1.0, interruptions:2.2, narrative:1.0 },
-    why:"Fast cuts and intense stimulation. Low sustained thinking demand; can train constant switching.",
-    alternatives:["Super Simple Songs","PBS KIDS"]
-  },
-  { id:"vlad", name:"Vlad and Niki", type:"youtube", age:"3-7", score:2.4,
-    breakdown:{ pacing:0.9, stimulation:1.0, cognitive:1.1, interruptions:2.0, narrative:1.0 },
-    why:"High-energy novelty scenes that can reinforce quick dopamine loops.",
-    alternatives:["PBS KIDS","Bluey"]
-  },
-  { id:"diana", name:"Kids Diana Show", type:"youtube", age:"3-7", score:2.6,
-    breakdown:{ pacing:1.0, stimulation:1.1, cognitive:1.2, interruptions:2.0, narrative:1.1 },
-    why:"Attention-grabbing edits with low sustained cognitive demand.",
-    alternatives:["PBS KIDS","Numberblocks"]
-  },
-  { id:"nastya", name:"Like Nastya", type:"youtube", age:"3-7", score:3.5,
-    breakdown:{ pacing:1.4, stimulation:1.4, cognitive:1.6, interruptions:2.2, narrative:1.4 },
-    why:"More story structure than shorts, but still high novelty/stimulation.",
-    alternatives:["Bluey","Daniel Tiger’s Neighborhood"]
-  },
-  { id:"pinkfong", name:"Baby Shark (Pinkfong)", type:"youtube", age:"2-4", score:3.0,
-    breakdown:{ pacing:1.2, stimulation:1.2, cognitive:1.3, interruptions:2.6, narrative:1.2 },
-    why:"Catchy and repetitive; still stimulating depending on the episode.",
-    alternatives:["Super Simple Songs","PBS KIDS"]
-  },
-  { id:"chuchu", name:"ChuChu TV", type:"youtube", age:"2-4", score:3.2,
-    breakdown:{ pacing:1.2, stimulation:1.4, cognitive:1.4, interruptions:2.3, narrative:1.3 },
-    why:"Nursery structure but often bright/fast visuals.",
-    alternatives:["Super Simple Songs","PBS KIDS"]
-  },
-  { id:"supersimple", name:"Super Simple Songs", type:"youtube", age:"2-4", score:5.6,
-    breakdown:{ pacing:2.4, stimulation:2.3, cognitive:2.0, interruptions:2.8, narrative:2.0 },
-    why:"Calmer pacing and predictable patterns compared to many kids channels.",
-    alternatives:["Daniel Tiger’s Neighborhood","Numberblocks"]
-  },
-  { id:"ryan", name:"Ryan’s World", type:"youtube", age:"7-12", score:4.0,
-    breakdown:{ pacing:1.8, stimulation:1.8, cognitive:1.7, interruptions:2.4, narrative:1.6 },
-    why:"Novelty-heavy with frequent attention hooks and brand/merch energy.",
-    alternatives:["MythBusters","How-it’s-made style shows"]
-  },
-  { id:"pbs", name:"PBS KIDS", type:"youtube", age:"3-7", score:7.0,
-    breakdown:{ pacing:2.8, stimulation:2.8, cognitive:2.8, interruptions:3.4, narrative:2.6 },
-    why:"Education-first content with calmer pacing than typical entertainment channels.",
-    alternatives:["Daniel Tiger’s Neighborhood","Sesame Street"]
-  },
-  { id:"blippi", name:"Blippi", type:"youtube", age:"2-4", score:4.2,
-    breakdown:{ pacing:2.0, stimulation:1.9, cognitive:1.8, interruptions:2.4, narrative:1.6 },
-    why:"Often educational themes, but delivery can be high-energy with attention hooks.",
-    alternatives:["PBS KIDS","Daniel Tiger’s Neighborhood"]
-  },
-  { id:"numberblocks", name:"Numberblocks", type:"show", age:"3-7", score:7.4,
-    breakdown:{ pacing:2.8, stimulation:2.4, cognitive:3.2, interruptions:3.6, narrative:2.6 },
-    why:"Math-focused structure supports cognitive engagement and sustained attention.",
-    alternatives:["Sesame Street","PBS KIDS"]
-  },
+/* ===== HIGH FOCUS GOLD STANDARD ===== */
 
-  // Games
-  { id:"roblox", name:"Roblox", type:"game", age:"7-12", score:6.0,
-    breakdown:{ pacing:2.4, stimulation:2.2, cognitive:2.6, interruptions:3.0, narrative:1.6 },
-    why:"Focus impact varies by experience; some are chaotic and stimulation-heavy.",
-    alternatives:["Minecraft","Offline sports/hobby time"]
-  },
-  { id:"minecraft", name:"Minecraft", type:"game", age:"7-12", score:7.8,
-    breakdown:{ pacing:3.0, stimulation:2.8, cognitive:3.4, interruptions:3.8, narrative:2.0 },
-    why:"Supports planning and creativity; best in creative/build modes.",
-    alternatives:["LEGO building (offline)","Puzzle games (offline-first)"]
-  },
-  { id:"amongus", name:"Among Us", type:"game", age:"8-12", score:4.5,
-    breakdown:{ pacing:2.0, stimulation:2.2, cognitive:2.4, interruptions:2.8, narrative:1.2 },
-    why:"Fast rounds can encourage switching, but includes deduction elements.",
-    alternatives:["Board games","Puzzle games"]
-  },
-  { id:"subway", name:"Subway Surfers", type:"game", age:"8-12", score:4.8,
-    breakdown:{ pacing:2.2, stimulation:2.2, cognitive:2.0, interruptions:2.2, narrative:1.0 },
-    why:"Endless runner loops reward quick reactions and repetition.",
-    alternatives:["Sports practice","Creative building games"]
-  }
+{
+id:"bluey",name:"Bluey",type:"show",age:"3-7",score:9.0,
+breakdown:{pacing:3.7,stimulation:2.4,cognitive:3.6,interruptions:3.8,narrative:3.9},
+why:"Story-driven, slow pacing, strong emotional and narrative engagement.",
+alternatives:["Daniel Tiger","Numberblocks","Sesame Street"]
+},
+
+{
+id:"numberblocks",name:"Numberblocks",type:"show",age:"3-7",score:8.6,
+breakdown:{pacing:3.2,stimulation:2.4,cognitive:3.8,interruptions:3.7,narrative:3.1},
+why:"Math-centered structure builds sustained thinking.",
+alternatives:["Bluey","Sesame Street","Wild Kratts"]
+},
+
+{
+id:"daniel",name:"Daniel Tiger",type:"show",age:"2-4",score:8.3,
+breakdown:{pacing:3.5,stimulation:2.3,cognitive:3.2,interruptions:3.6,narrative:3.2},
+why:"Calm repetition and emotional regulation.",
+alternatives:["Bluey","Numberblocks"]
+},
+
+{
+id:"wildkratts",name:"Wild Kratts",type:"show",age:"4-8",score:8.1,
+breakdown:{pacing:3.1,stimulation:2.5,cognitive:3.3,interruptions:3.4,narrative:3.0},
+why:"Educational adventure format encourages curiosity.",
+alternatives:["Magic School Bus","Bluey"]
+},
+
+{
+id:"magicschoolbus",name:"Magic School Bus",type:"show",age:"5-9",score:8.2,
+breakdown:{pacing:3.0,stimulation:2.4,cognitive:3.6,interruptions:3.5,narrative:3.2},
+why:"Inquiry-based science storytelling.",
+alternatives:["Wild Kratts","Numberblocks"]
+},
+
+{
+id:"sesame",name:"Sesame Street",type:"show",age:"3-7",score:7.8,
+breakdown:{pacing:2.8,stimulation:2.6,cognitive:3.0,interruptions:3.3,narrative:2.9},
+why:"Strong educational base, slightly segmented.",
+alternatives:["Daniel Tiger","Bluey"]
+},
+
+{
+id:"khan",name:"Khan Academy Kids",type:"app",age:"4-7",score:8.4,
+breakdown:{pacing:3.4,stimulation:2.2,cognitive:3.7,interruptions:3.8,narrative:2.9},
+why:"Structured learning environment without ads.",
+alternatives:["ABCmouse","Numberblocks"]
+},
+
+/* ===== MEDIUM ===== */
+
+{
+id:"peppa",name:"Peppa Pig",type:"show",age:"3-7",score:7.1,
+breakdown:{pacing:2.8,stimulation:2.5,cognitive:2.6,interruptions:3.4,narrative:2.7},
+why:"Simple episodic storytelling.",
+alternatives:["Bluey","Daniel Tiger"]
+},
+
+{
+id:"arthur",name:"Arthur",type:"show",age:"5-9",score:7.6,
+breakdown:{pacing:2.9,stimulation:2.3,cognitive:3.2,interruptions:3.5,narrative:3.0},
+why:"Social problem solving and narrative arcs.",
+alternatives:["Bluey","Magic School Bus"]
+},
+
+{
+id:"odd",name:"Odd Squad",type:"show",age:"7-10",score:7.3,
+breakdown:{pacing:2.6,stimulation:2.7,cognitive:3.0,interruptions:3.3,narrative:2.8},
+why:"Logic and math puzzles in show format.",
+alternatives:["Wild Kratts","Arthur"]
+},
+
+{
+id:"lego",name:"LEGO Shows",type:"show",age:"6-10",score:6.4,
+breakdown:{pacing:2.4,stimulation:2.8,cognitive:2.7,interruptions:3.0,narrative:2.5},
+why:"Creative themes but action-heavy.",
+alternatives:["Minecraft","Bluey"]
+},
+
+{
+id:"minecraft",name:"Minecraft",type:"game",age:"7-12",score:7.9,
+breakdown:{pacing:3.1,stimulation:2.7,cognitive:3.4,interruptions:3.6,narrative:2.0},
+why:"Planning and creativity when used well.",
+alternatives:["LEGO offline","Puzzle games"]
+},
+
+{
+id:"roblox",name:"Roblox",type:"game",age:"7-12",score:6.0,
+breakdown:{pacing:2.4,stimulation:2.4,cognitive:2.6,interruptions:2.8,narrative:1.8},
+why:"Highly variable quality by game.",
+alternatives:["Minecraft","Board games"]
+},
+
+/* ===== LOW FOCUS / HIGH STIM ===== */
+
+{
+id:"cocomelon",name:"Cocomelon",type:"youtube",age:"2-4",score:2.0,
+breakdown:{pacing:0.6,stimulation:0.7,cognitive:1.0,interruptions:2.2,narrative:0.8},
+why:"Extremely fast cuts and dopamine loops.",
+alternatives:["Super Simple Songs","Daniel Tiger"]
+},
+
+{
+id:"vlad",name:"Vlad and Niki",type:"youtube",age:"3-7",score:2.3,
+breakdown:{pacing:0.9,stimulation:1.0,cognitive:1.0,interruptions:2.1,narrative:1.0},
+why:"Novelty-driven skits.",
+alternatives:["PBS Kids","Bluey"]
+},
+
+{
+id:"nastya",name:"Like Nastya",type:"youtube",age:"3-7",score:3.2,
+breakdown:{pacing:1.2,stimulation:1.4,cognitive:1.4,interruptions:2.1,narrative:1.2},
+why:"High novelty with weak narrative.",
+alternatives:["Daniel Tiger","Numberblocks"]
+},
+
+{
+id:"ryan",name:"Ryan’s World",type:"youtube",age:"6-10",score:3.9,
+breakdown:{pacing:1.8,stimulation:1.7,cognitive:1.6,interruptions:2.4,narrative:1.5},
+why:"Merchandising and stimulation focus.",
+alternatives:["Mythbusters Kids","Wild Kratts"]
+},
+
+{
+id:"subway",name:"Subway Surfers",type:"game",age:"8-12",score:4.7,
+breakdown:{pacing:2.1,stimulation:2.2,cognitive:2.0,interruptions:2.3,narrative:1.0},
+why:"Endless reward loop.",
+alternatives:["Puzzle games","Sports"]
+},
+
+{
+id:"among",name:"Among Us",type:"game",age:"8-12",score:4.6,
+breakdown:{pacing:2.0,stimulation:2.2,cognitive:2.3,interruptions:2.6,narrative:1.2},
+why:"Short attention rounds.",
+alternatives:["Chess","Board games"]
+},
+
+/* ===== ADDITIONAL CONTENT ===== */
+
+{ id:"pbs",name:"PBS Kids",type:"youtube",age:"3-7",score:7.4,
+breakdown:{pacing:2.9,stimulation:2.6,cognitive:3.0,interruptions:3.3,narrative:2.8},
+why:"Educational-first content.",
+alternatives:["Daniel Tiger","Sesame Street"]
+},
+
+{ id:"super",name:"Super Simple Songs",type:"youtube",age:"2-4",score:5.9,
+breakdown:{pacing:2.3,stimulation:2.2,cognitive:2.1,interruptions:2.7,narrative:2.0},
+why:"Predictable structure.",
+alternatives:["Daniel Tiger","PBS Kids"]
+},
+
+{ id:"octo",name:"Octonauts",type:"show",age:"3-7",score:7.5,
+breakdown:{pacing:2.8,stimulation:2.5,cognitive:3.1,interruptions:3.4,narrative:2.9},
+why:"Mission-based learning.",
+alternatives:["Wild Kratts","Bluey"]
+},
+
+{ id:"curious",name:"Curious George",type:"show",age:"3-6",score:7.7,
+breakdown:{pacing:2.9,stimulation:2.4,cognitive:3.2,interruptions:3.5,narrative:3.0},
+why:"Problem solving stories.",
+alternatives:["Daniel Tiger","Bluey"]
+},
+
+{ id:"storybots",name:"StoryBots",type:"show",age:"4-8",score:7.9,
+breakdown:{pacing:2.8,stimulation:2.6,cognitive:3.4,interruptions:3.5,narrative:3.0},
+why:"Question-driven learning.",
+alternatives:["Magic School Bus","Wild Kratts"]
+}
+
 ];
 
-// DOM
-const listEl = document.getElementById("list");
-const detailEl = document.getElementById("detail");
-const countEl = document.getElementById("count");
+/* ===========================
+   UI LOGIC
+   =========================== */
 
-const searchEl = document.getElementById("search");
-const ageEl = document.getElementById("age");
-const typeEl = document.getElementById("type");
-const sortEl = document.getElementById("sort");
-const resetEl = document.getElementById("reset");
+const listEl=document.getElementById("list");
+const detailEl=document.getElementById("detail");
+const countEl=document.getElementById("count");
 
-let selectedId = null;
+const searchEl=document.getElementById("search");
+const ageEl=document.getElementById("age");
+const typeEl=document.getElementById("type");
+const sortEl=document.getElementById("sort");
+const resetEl=document.getElementById("reset");
 
-function barHTML(label, v04){
-  const pct = pctFrom04(v04);
-  return `
-    <div class="barRow">
-      <div class="barLabel">${label}</div>
-      <div class="barTrack">
-        <div class="barFill" style="width:${pct}%;"></div>
-      </div>
+let selectedId=null;
+
+function barHTML(label,v){
+  return`
+  <div class="barRow">
+    <div class="barLabel">${label}</div>
+    <div class="barTrack">
+      <div class="barFill" style="width:${pctFrom04(v)}%"></div>
     </div>
-  `;
+  </div>`;
 }
 
 function renderDetail(item){
-  selectedId = item.id;
 
-  const cls = scoreClass(item.score);
-  const b = item.breakdown;
+  selectedId=item.id;
 
-  detailEl.innerHTML = `
-    <div class="detailTop">
-      <div class="heroBox">${item.name}</div>
+  const cls=scoreClass(item.score);
+  const b=item.breakdown;
 
-      <div>
-        <h2 class="detailTitle">${item.name}</h2>
-        <div class="detailMeta">${typeLabel(item.type)} • Ages ${item.age} • ${labelFor(item.score)}</div>
+  detailEl.innerHTML=`
 
-        <div class="bigScore ${cls}">
-          ${item.score.toFixed(1)} /10
-        </div>
+  <div class="detailTop">
 
-        <div class="section">
-          <div class="sectionTitle">Why it scored this way</div>
-          <div class="whyText">${item.why}</div>
-        </div>
+    <div class="heroBox">${item.name}</div>
+
+    <div>
+      <h2 class="detailTitle">${item.name}</h2>
+      <div class="detailMeta">${typeLabel(item.type)} • Ages ${item.age} • ${labelFor(item.score)}</div>
+
+      <div class="bigScore ${cls}">
+        ${item.score.toFixed(1)} /10
+      </div>
+
+      <div class="section">
+        <div class="sectionTitle">Why it scored this way</div>
+        <div class="whyText">${item.why}</div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="sectionTitle">Breakdown charts</div>
-      <div class="bars">
-        ${barHTML("Pacing (25%)", b.pacing)}
-        ${barHTML("Stimulation (20%)", b.stimulation)}
-        ${barHTML("Cognitive (25%)", b.cognitive)}
-        ${barHTML("Interruptions (15%)", b.interruptions)}
-        ${barHTML("Narrative (15%)", b.narrative)}
-      </div>
-    </div>
+  </div>
 
-    <div class="section">
-      <div class="sectionTitle">Higher-focus alternatives</div>
+  <div class="section">
+    <div class="sectionTitle">Focus Breakdown</div>
+    <div class="bars">
+      ${barHTML("Pacing",b.pacing)}
+      ${barHTML("Stimulation",b.stimulation)}
+      ${barHTML("Cognitive Load",b.cognitive)}
+      ${barHTML("Interruptions",b.interruptions)}
+      ${barHTML("Narrative Reward",b.narrative)}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sectionTitle">✅ Higher-Focus Alternatives</div>
+
+    <div style="background:#f0fdf4;border:1px solid #86efac;padding:12px;border-radius:12px;margin-top:8px">
+
       <ul>
-        ${(item.alternatives || []).map(a => `<li>${a}</li>`).join("")}
+        ${(item.alternatives||[]).map(a=>`<li>${a}</li>`).join("")}
       </ul>
-    </div>
 
-    <div class="section">
-      <div class="sectionTitle">Objective scoring rubric (0–4 each)</div>
-      <div class="rubric">
-        <div class="rubricHead">Use this to keep rankings consistent across reviewers</div>
-        <table>
-          <tr><th>Pacing</th><td>Count scene/cut changes in 60 seconds (more cuts = lower score).</td></tr>
-          <tr><th>Stimulation</th><td>Frequency of loud/flash/chaos spikes (more spikes = lower score).</td></tr>
-          <tr><th>Cognitive</th><td>Planning/problem-solving vs passive consumption (more thinking = higher score).</td></tr>
-          <tr><th>Interruptions</th><td>Ads, autoplay loops, algorithm pulls (more interruptions = lower score).</td></tr>
-          <tr><th>Narrative</th><td>Does attention get rewarded with continuity/story payoff?</td></tr>
-        </table>
+      <div style="font-size:12px;font-weight:800;color:#14532d;margin-top:6px">
+        Switching to one of these improves attention quality.
       </div>
+
     </div>
+  </div>
   `;
 }
 
 function renderList(items){
-  listEl.innerHTML = "";
-  countEl.textContent = `${items.length} items`;
+
+  listEl.innerHTML="";
+  countEl.textContent=`${items.length} items`;
 
   if(!items.length){
-    listEl.innerHTML = `<div class="empty">No matches. Try clearing filters.</div>`;
-    detailEl.innerHTML = `<div class="empty">No item selected.</div>`;
+    listEl.innerHTML=`<div class="empty">No results.</div>`;
     return;
   }
 
-  // If selected item disappears due to filters, select top item
-  if(!items.some(x => x.id === selectedId)) selectedId = items[0].id;
+  if(!items.some(x=>x.id===selectedId)) selectedId=items[0].id;
 
-  items.forEach(item => {
-    const cls = scoreClass(item.score);
+  items.forEach(item=>{
 
-    const row = document.createElement("div");
-    row.className = "row";
-    row.addEventListener("click", ()=> renderDetail(item));
+    const row=document.createElement("div");
+    row.className="row";
+    row.onclick=()=>renderDetail(item);
 
-    row.innerHTML = `
+    row.innerHTML=`
+
       <div class="rowLeft">
         <div class="thumb">${initials(item.name)}</div>
+
         <div class="nameBlock">
           <div class="name">${item.name}</div>
           <div class="meta">${typeLabel(item.type)} • Ages ${item.age}</div>
         </div>
       </div>
 
-      <div class="scorePill ${cls}">
-        <span class="scoreNum">${item.score.toFixed(1)}/10</span>
+      <div class="scorePill ${scoreClass(item.score)}">
+        <span>${item.score.toFixed(1)}/10</span>
         <span>${labelFor(item.score)}</span>
       </div>
     `;
@@ -266,42 +329,45 @@ function renderList(items){
     listEl.appendChild(row);
   });
 
-  const selected = items.find(x => x.id === selectedId) || items[0];
-  renderDetail(selected);
+  renderDetail(items.find(x=>x.id===selectedId)||items[0]);
 }
 
 function apply(){
-  const q = searchEl.value.trim().toLowerCase();
-  const age = ageEl.value;
-  const type = typeEl.value;
-  const sort = sortEl.value;
 
-  let items = [...CONTENT];
+  let items=[...CONTENT];
 
-  if(q) items = items.filter(x => x.name.toLowerCase().includes(q));
-  if(age !== "all") items = items.filter(x => x.age === age);
-  if(type !== "all") items = items.filter(x => x.type === type);
+  const q=searchEl.value.toLowerCase().trim();
+  const age=ageEl.value;
+  const type=typeEl.value;
+  const sort=sortEl.value;
 
-  if(sort === "score_desc") items.sort((a,b)=> b.score - a.score);
-  if(sort === "score_asc") items.sort((a,b)=> a.score - b.score);
-  if(sort === "name_asc") items.sort((a,b)=> a.name.localeCompare(b.name));
+  if(q) items=items.filter(x=>x.name.toLowerCase().includes(q));
+  if(age!=="all") items=items.filter(x=>x.age===age);
+  if(type!=="all") items=items.filter(x=>x.type===type);
+
+  if(sort==="score_desc") items.sort((a,b)=>b.score-a.score);
+  if(sort==="score_asc") items.sort((a,b)=>a.score-b.score);
+  if(sort==="name_asc") items.sort((a,b)=>a.name.localeCompare(b.name));
 
   renderList(items);
 }
 
-searchEl.addEventListener("input", apply);
-ageEl.addEventListener("change", apply);
-typeEl.addEventListener("change", apply);
-sortEl.addEventListener("change", apply);
+/* Events */
 
-resetEl.addEventListener("click", ()=>{
+searchEl.oninput=apply;
+ageEl.onchange=apply;
+typeEl.onchange=apply;
+sortEl.onchange=apply;
+
+resetEl.onclick=()=>{
   searchEl.value="";
   ageEl.value="all";
   typeEl.value="all";
   sortEl.value="score_desc";
   apply();
-});
+};
 
-// init
-selectedId = CONTENT.slice().sort((a,b)=>b.score-a.score)[0]?.id || null;
+/* Init */
+
+selectedId=CONTENT.sort((a,b)=>b.score-a.score)[0].id;
 apply();
